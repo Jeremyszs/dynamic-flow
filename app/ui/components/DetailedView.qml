@@ -191,74 +191,73 @@ Item {
             font.bold: true
         }
 
-    // Provider Carousel & Action buttons
-    readonly property string provLabel: controller.currentProvider.clean_name + " (" + (controller.selectedProviderIndex + 1) + "/" + controller.providersList.length + ")"
-    readonly property int provLblLen: root.dp(provLabel.length * 6 + 18)
-
-    CircleButton {
-        id: nextProvBtn
-        x: root.width - root.dp(24) - root.dp(12) - root.dp(10)
-        y: root.poolHeaderY - root.dp(10)
-        radiusSize: root.dp(10)
-        iconType: "right"
-        onClicked: controller.nextProvider()
-    }
-
-    Text {
-        id: provLabelText
-        anchors.right: parent.right
-        anchors.rightMargin: root.dp(24 + 32)
-        y: root.poolHeaderY - (implicitHeight / 2)
-        text: root.provLabel
-        color: "#FFFFFF"
-        font.family: "SF Pro Display"
-        font.pointSize: 8
-        font.bold: true
-    }
-
-    CircleButton {
-        id: prevProvBtn
-        anchors.right: parent.right
-        anchors.rightMargin: root.dp(24 + 32) + root.provLblLen
-        y: root.poolHeaderY - root.dp(10)
-        radiusSize: root.dp(10)
-        iconType: "left"
-        onClicked: controller.prevProvider()
-    }
-
-    PillButton {
-        id: disableAllBtn
-        anchors.right: prevProvBtn.left
-        anchors.rightMargin: root.dp(14)
-        y: root.poolHeaderY - root.dp(10)
-        width: root.dp(72)
-        height: root.dp(20)
-        buttonRadius: root.dp(8)
-        text: (controller.currentProvider.active_count > 0) ? "Disable All" : "Enable All"
-        textColor: (controller.currentProvider.active_count > 0) ? "#A1A1A6" : "#30D158"
-        normalColor: "#1C1C1F"
-        borderColor: "#333338"
-        onClicked: {
-            controller.toggleProviderActive(
-                controller.currentProvider.raw_name,
-                controller.currentProvider.active_count > 0
-            );
+        PillButton {
+            x: root.dp(182)
+            y: root.poolHeaderY - root.dp(10)
+            width: root.dp(74)
+            height: root.dp(20)
+            buttonRadius: root.dp(8)
+            text: "Refresh"
+            normalColor: "#1C1C1F"
+            textColor: "#A1A1A6"
+            borderColor: "#333338"
+            onClicked: controller.triggerRefresh()
         }
-    }
 
-    PillButton {
-        anchors.right: disableAllBtn.left
-        anchors.rightMargin: root.dp(10)
-        y: root.poolHeaderY - root.dp(10)
-        width: root.dp(64)
-        height: root.dp(20)
-        buttonRadius: root.dp(8)
-        text: "Refresh"
-        normalColor: "#1C1C1F"
-        textColor: "#A1A1A6"
-        borderColor: "#333338"
-        onClicked: controller.triggerRefresh()
-    }
+        // Provider Carousel & Action buttons
+        readonly property string provLabel: controller.currentProvider.clean_name + " (" + (controller.selectedProviderIndex + 1) + "/" + controller.providersList.length + ")"
+        readonly property int provLblLen: root.dp(provLabel.length * 6 + 18)
+
+        CircleButton {
+            id: nextProvBtn
+            x: root.width - root.dp(24) - root.dp(12) - root.dp(10)
+            y: root.poolHeaderY - root.dp(10)
+            radiusSize: root.dp(10)
+            iconType: "right"
+            onClicked: controller.nextProvider()
+        }
+
+        Text {
+            id: provLabelText
+            anchors.right: parent.right
+            anchors.rightMargin: root.dp(24 + 32)
+            y: root.poolHeaderY - (implicitHeight / 2)
+            text: accountManagerGroup.provLabel
+            color: "#FFFFFF"
+            font.family: "SF Pro Display"
+            font.pointSize: 8
+            font.bold: true
+        }
+
+        CircleButton {
+            id: prevProvBtn
+            anchors.right: parent.right
+            anchors.rightMargin: root.dp(24 + 32) + accountManagerGroup.provLblLen
+            y: root.poolHeaderY - root.dp(10)
+            radiusSize: root.dp(10)
+            iconType: "left"
+            onClicked: controller.prevProvider()
+        }
+
+        PillButton {
+            id: disableAllBtn
+            anchors.right: prevProvBtn.left
+            anchors.rightMargin: root.dp(14)
+            y: root.poolHeaderY - root.dp(10)
+            width: root.dp(72)
+            height: root.dp(20)
+            buttonRadius: root.dp(8)
+            text: (controller.currentProvider.active_count > 0) ? "Disable All" : "Enable All"
+            textColor: (controller.currentProvider.active_count > 0) ? "#A1A1A6" : "#30D158"
+            normalColor: "#1C1C1F"
+            borderColor: "#333338"
+            onClicked: {
+                controller.toggleProviderActive(
+                    controller.currentProvider.raw_name,
+                    controller.currentProvider.active_count > 0
+                );
+            }
+        }
 
     // Account Manager Card Container (y = poolHeaderY + dp(14), h = dp(120))
     Rectangle {
@@ -362,7 +361,7 @@ Item {
             Text {
                 id: statusBadgeText
                 anchors.centerIn: parent
-                text: "P" + (controller.currentAccount.priority || 1) + " • " + (controller.currentAccount.is_current ? "Active Route" : (controller.currentAccount.is_active ? "Standby Ready" : "Disabled"))
+                text: "P" + (controller.currentAccount.priority || 1) + " • " + (controller.currentAccount.is_current ? "Active Route" : (controller.currentAccount.is_active ? "Standby" : "Disabled"))
                 color: controller.currentAccount.is_current ? "#30D158" : (controller.currentAccount.is_active ? "#FFFFFF" : "#58585E")
                 font.family: "SF Pro Display"
                 font.pointSize: 7
@@ -479,22 +478,24 @@ Item {
             x: 0
             y: currentBarY
             width: root.width
-            height: root.dp(32)
+            height: root.dp(26)
 
             Text {
                 x: root.dp(24)
-                y: -root.dp(2)
+                y: -(implicitHeight / 2)
                 text: modelRowItem.modelData.clean_name
                 color: "#FFFFFF"
                 font.family: "SF Pro Display"
                 font.pointSize: 9
-                font.bold: true
+                elide: Text.ElideRight
+                width: root.width - root.dp(48) - modelTokensStat.implicitWidth - root.dp(16)
             }
 
             Text {
+                id: modelTokensStat
                 anchors.right: parent.right
                 anchors.rightMargin: root.dp(24)
-                y: -root.dp(2)
+                y: -(implicitHeight / 2)
                 text: modelRowItem.modelData.tokens_str
                 color: "#A1A1A6"
                 font.family: "SF Pro Display"
