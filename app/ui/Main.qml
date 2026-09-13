@@ -16,17 +16,20 @@ Window {
     Connections {
         target: controller
         function onViewChanged() {
-            // Restore and enforce x and y bindings on view change
             window.x = controller.targetX;
             window.y = controller.targetY;
         }
     }
 
     onScreenChanged: {
-        controller.updateScreenDpr(window.screen);
+        if (controller && controller.updateScreenDpr) {
+            controller.updateScreenDpr(window.screen);
+        }
     }
     Component.onCompleted: {
-        controller.updateScreenDpr(window.screen);
+        if (controller && controller.updateScreenDpr) {
+            controller.updateScreenDpr(window.screen);
+        }
     }
 
     Behavior on width {
@@ -69,10 +72,8 @@ Window {
             window.isDragging = false;
             window.wasDragged = false;
             var res = controller.clampGeometry(window.x, window.y, window.width, window.height);
-            var targetX = res[0];
-            var targetY = res[1];
-            window.x = targetX;
-            window.y = targetY;
+            window.x = res[0];
+            window.y = res[1];
         }
     }
 
@@ -81,57 +82,15 @@ Window {
         id: rootContainer
         anchors.fill: parent
 
-        // Main Island Capsule with Smooth Corners & Specular Glow
+        // Single Island Capsule (No Split Bubble)
         IslandCapsule {
             id: mainCapsule
-            anchors.left: parent.left
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            anchors.right: (controller.currentView === "min" && controller.isSplitActive) ? splitBubble.left : parent.right
-            anchors.rightMargin: (controller.currentView === "min" && controller.isSplitActive) ? 10 : 0
+            anchors.fill: parent
             cornerRadius: controller.targetRadius
             isDockedNotch: controller.isDockedNotch
             isHovered: controller.isHovered
-            isActivityActive: controller.isActivityActive
+            isActivityActive: controller.isActivityActive || controller.fleetState === "BUSY"
             isActivityError: controller.isActivityError
-        }
-
-        // Split Island Activity Bubble (ejected to the right when active generation occurs)
-        Item {
-            id: splitBubble
-            visible: controller.currentView === "min" && controller.isSplitActive
-            width: Math.max(56, splitText.implicitWidth + 24)
-            height: parent.height
-            anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-
-            IslandCapsule {
-                anchors.fill: parent
-                cornerRadius: parent.height / 2
-                isDockedNotch: controller.isDockedNotch
-                isHovered: controller.isHovered
-                isActivityActive: false
-                isActivityError: false
-            }
-
-            Text {
-                id: splitText
-                anchors.centerIn: parent
-                text: {
-                    var tps = controller.latestTps;
-                    if (!tps || tps <= 0) return "";
-                    return Math.round(tps) + " t/s";
-                }
-                color: "#FF9F0A"
-                font.family: "SF Pro Display"
-                font.pointSize: 9
-                font.bold: true
-            }
-
-            Behavior on visible {
-                NumberAnimation { duration: 150 }
-            }
         }
 
         // Min View Content
@@ -141,11 +100,9 @@ Window {
             visible: controller ? (controller.currentView === "min") : true
             enabled: visible
             opacity: visible ? 1.0 : 0.0
-            anchors.left: parent.left
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            width: mainCapsule.width
+            anchors.fill: parent
             clip: true
+            z: 1
         }
 
         // Normal View Content
@@ -156,6 +113,7 @@ Window {
             opacity: visible ? 1.0 : 0.0
             anchors.fill: parent
             clip: true
+            z: 5
         }
 
         // Detailed View Content
@@ -166,25 +124,30 @@ Window {
             opacity: visible ? 1.0 : 0.0
             anchors.fill: parent
             clip: true
+            z: 10
         }
 
-        // Background Window Drag Area (Behind interactive child controls)
+        // Background Window Drag Area
         MouseArea {
             id: windowDragArea
             anchors.fill: parent
-            z: -1
+            z: 99
             hoverEnabled: true
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             cursorShape: Qt.ArrowCursor
 
             onEntered: {
-                controller.isHovered = true;
+                controller.setHovered(true);
             }
             onExited: {
-                controller.isHovered = false;
+                controller.setHovered(false);
             }
 
             onPressed: function(mouse) {
+                if (detailedView.visible && mouse.x > detailedView.width - 45 && mouse.y < 45) {
+                    controller.quitApp();
+                    return;
+                }
                 if (mouse.button === Qt.LeftButton) {
                     controller.startWindowDrag();
                     window.isDragging = false;
@@ -213,7 +176,6 @@ Window {
                     if (window.wasDragged) {
                         window.endDragAndClamp();
                     } else {
-                        // Immediate, responsive view cycle on click
                         controller.cycleView();
                     }
                 }

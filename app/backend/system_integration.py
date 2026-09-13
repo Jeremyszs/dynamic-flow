@@ -12,23 +12,23 @@ def check_startup_registration(script_dir=None):
         key_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
         if script_dir is None:
             script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        bat_path = os.path.join(script_dir, 'dynamic-token.bat')
+        bat_path = os.path.join(script_dir, 'dynamic-flow.bat')
         if not os.path.exists(bat_path):
-            bat_path = os.path.expandvars(r"%USERPROFILE%\dynamic-token\dynamic-token.bat")
+            bat_path = os.path.expandvars(r"%USERPROFILE%\dynamic-token\dynamic-flow.bat")
 
         with winreg.OpenKey(winreg.HKEY_CURRENT_USER, key_path, 0, winreg.KEY_READ | winreg.KEY_SET_VALUE) as key:
             try:
-                val, _ = winreg.QueryValueEx(key, 'DynamicTokenHUD')
+                val, _ = winreg.QueryValueEx(key, 'DynamicFlowHUD')
                 if val != f'"{bat_path}"':
-                    winreg.SetValueEx(key, 'DynamicTokenHUD', 0, winreg.REG_SZ, f'"{bat_path}"')
+                    winreg.SetValueEx(key, 'DynamicFlowHUD', 0, winreg.REG_SZ, f'"{bat_path}"')
             except FileNotFoundError:
-                winreg.SetValueEx(key, 'DynamicTokenHUD', 0, winreg.REG_SZ, f'"{bat_path}"')
+                winreg.SetValueEx(key, 'DynamicFlowHUD', 0, winreg.REG_SZ, f'"{bat_path}"')
     except Exception:
         pass
 
 def check_9router_health():
     try:
-        req = urllib.request.Request('http://127.0.0.1:20128', headers={'User-Agent': 'DynamicTokenHUD/1.0'})
+        req = urllib.request.Request('http://127.0.0.1:20128', headers={'User-Agent': 'DynamicFlowHUD/1.0'})
         with urllib.request.urlopen(req, timeout=0.8) as resp:
             return resp.status in (200, 301, 302, 401, 403)
     except Exception:

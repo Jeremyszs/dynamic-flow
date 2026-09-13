@@ -12,8 +12,8 @@ def main():
     os.environ["QT_QUICK_CONTROLS_STYLE"] = "Basic"
 
     app = QGuiApplication(sys.argv)
-    app.setApplicationName("Dynamic Token HUD")
-    app.setOrganizationName("DynamicToken")
+    app.setApplicationName("Dynamic Flow HUD")
+    app.setOrganizationName("DynamicFlow")
 
     # 2. Register Apple SF Pro Display fonts into QFontDatabase & set default application font
     base_dir = os.path.dirname(os.path.abspath(__file__))

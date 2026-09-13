@@ -15,7 +15,7 @@ CONFIG_PATH = os.path.expandvars(r'%LOCALAPPDATA%\hermes\dynamic_flow_config.jso
 
 # EXACT LEGACY TKINTER PHYSICAL DIMENSIONS (Source of Truth)
 TKINTER_PHYSICAL_SPECS = {
-    'min': (340, 42, 21),
+    'min': (360, 42, 21),
     'normal': (520, 136, 26),
     'detailed': (660, 540, 28)
 }
@@ -170,9 +170,9 @@ class HUDController(QObject):
     @Property(int, notify=viewChanged)
     def targetWidth(self):
         pw, _, _ = TKINTER_PHYSICAL_SPECS[self._current_view]
-        # Stretch min view when hovered with cursor (340px -> 380px physical)
+        # Stretch min view when hovered with cursor (360px -> 390px physical)
         if self._current_view == 'min' and self._is_hovered:
-            pw = 380
+            pw = 390
         return self.scaling.dp(pw)
 
     @Property(int, notify=viewChanged)

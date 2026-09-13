@@ -10,7 +10,7 @@ Item {
     readonly property int boxX1: root.dp(22)
     readonly property int boxW: width - (root.dp(22) * 2)
 
-    property string activeTab: "9router" // "9router" | "fleet"
+    property string activeTab: "9router"
 
     // 1. Header (y = dp(24))
     StatusDot {
@@ -21,7 +21,7 @@ Item {
         error: controller.isActivityError
     }
 
-    // Tab Switcher in Header
+    // Interactive Tab Header: 9Router Analytics vs Agent Fleet Roster
     Row {
         x: root.dp(44)
         y: root.dp(24) - (implicitHeight / 2)
@@ -97,53 +97,38 @@ Item {
         borderColor: "#4A1E22"
         iconColor: "#FF453A"
         radiusSize: root.dp(12)
-        onClicked: Qt.quit()
+        onClicked: controller.quitApp()
     }
 
-    // Row 2 (y = dp(54)): Timeline Tabs & Latency Metric (9Router tab only)
-    Item {
-        id: routerTabHeader
-        x: 0
-        y: 0
-        width: root.width
-        height: root.dp(64)
+    // Row 2 (y = dp(54)): Timeline Tabs & Latency Metric
+    TimelineTabs {
         visible: root.activeTab === "9router"
-
-        TimelineTabs {
-            x: root.dp(24)
-            y: root.dp(54) - (height / 2)
-            currentTimeline: controller.timeline
-            onTimelineSelected: function(key) {
-                controller.setTimeline(key);
-            }
-        }
-
-        Text {
-            anchors.right: parent.right
-            anchors.rightMargin: root.dp(24)
-            y: root.dp(54) - (implicitHeight / 2)
-            text: controller.latencySummaryStr
-            color: "#A1A1A6"
-            font.family: "SF Pro Display"
-            font.pointSize: 8
-            font.bold: true
+        x: root.dp(24)
+        y: root.dp(54) - (height / 2)
+        currentTimeline: controller.timeline
+        onTimelineSelected: function(key) {
+            controller.setTimeline(key);
         }
     }
 
-    // Container for 9Router specific cards (hidden when fleet tab is active)
-    Item {
-        id: routerCards
-        x: 0
-        y: root.dp(64)
-        width: root.width
-        height: root.height - root.dp(64)
+    Text {
         visible: root.activeTab === "9router"
+        anchors.right: parent.right
+        anchors.rightMargin: root.dp(24)
+        y: root.dp(54) - (implicitHeight / 2)
+        text: controller.latencySummaryStr
+        color: "#A1A1A6"
+        font.family: "SF Pro Display"
+        font.pointSize: 8
+        font.bold: true
+    }
 
-        // 2. PRIMARY METRICS CARD (y = dp(10), h = dp(66), boxX1 = dp(22), boxW = w - 2*dp(22))
-        Rectangle {
-            id: statCard
-            x: root.boxX1
-            y: root.dp(10)
+    // 2. PRIMARY METRICS CARD (y = dp(74), h = dp(66), boxX1 = dp(22), boxW = w - 2*dp(22))
+    Rectangle {
+        id: statCard
+        visible: root.activeTab === "9router"
+        x: root.boxX1
+        y: root.dp(74)
         width: root.boxW
         height: root.dp(66)
         radius: root.dp(16)
@@ -188,34 +173,30 @@ Item {
     // 3. DEDICATED SECTION: ACCOUNT MANAGER (poolHeaderY = dp(154), h = dp(120))
     readonly property int poolHeaderY: root.dp(154)
 
-    Text {
-        x: root.dp(24)
-        y: root.poolHeaderY - (implicitHeight / 2)
-        text: "ACCOUNT MANAGER"
-        color: "#58585E"
-        font.family: "SF Pro Display"
-        font.pointSize: 9
-        font.bold: true
-    }
+    Item {
+        id: accountManagerGroup
+        visible: root.activeTab === "9router"
+        x: 0
+        y: 0
+        width: root.width
+        height: root.height
 
-    PillButton {
-        x: root.dp(182)
-        y: root.poolHeaderY - root.dp(10)
-        width: root.dp(74)
-        height: root.dp(20)
-        buttonRadius: root.dp(8)
-        text: "Refresh"
-        normalColor: "#1C1C1F"
-        textColor: "#A1A1A6"
-        borderColor: "#333338"
-        onClicked: controller.triggerRefresh()
-    }
+        Text {
+            x: root.dp(24)
+            y: root.poolHeaderY - (implicitHeight / 2)
+            text: "ACCOUNT MANAGER"
+            color: "#58585E"
+            font.family: "SF Pro Display"
+            font.pointSize: 9
+            font.bold: true
+        }
 
     // Provider Carousel & Action buttons
     readonly property string provLabel: controller.currentProvider.clean_name + " (" + (controller.selectedProviderIndex + 1) + "/" + controller.providersList.length + ")"
     readonly property int provLblLen: root.dp(provLabel.length * 6 + 18)
 
     CircleButton {
+        id: nextProvBtn
         x: root.width - root.dp(24) - root.dp(12) - root.dp(10)
         y: root.poolHeaderY - root.dp(10)
         radiusSize: root.dp(10)
@@ -224,6 +205,7 @@ Item {
     }
 
     Text {
+        id: provLabelText
         anchors.right: parent.right
         anchors.rightMargin: root.dp(24 + 32)
         y: root.poolHeaderY - (implicitHeight / 2)
@@ -235,6 +217,7 @@ Item {
     }
 
     CircleButton {
+        id: prevProvBtn
         anchors.right: parent.right
         anchors.rightMargin: root.dp(24 + 32) + root.provLblLen
         y: root.poolHeaderY - root.dp(10)
@@ -244,8 +227,9 @@ Item {
     }
 
     PillButton {
-        anchors.right: parent.right
-        anchors.rightMargin: root.dp(24 + 32) + root.provLblLen + root.dp(14)
+        id: disableAllBtn
+        anchors.right: prevProvBtn.left
+        anchors.rightMargin: root.dp(14)
         y: root.poolHeaderY - root.dp(10)
         width: root.dp(72)
         height: root.dp(20)
@@ -260,6 +244,20 @@ Item {
                 controller.currentProvider.active_count > 0
             );
         }
+    }
+
+    PillButton {
+        anchors.right: disableAllBtn.left
+        anchors.rightMargin: root.dp(10)
+        y: root.poolHeaderY - root.dp(10)
+        width: root.dp(64)
+        height: root.dp(20)
+        buttonRadius: root.dp(8)
+        text: "Refresh"
+        normalColor: "#1C1C1F"
+        textColor: "#A1A1A6"
+        borderColor: "#333338"
+        onClicked: controller.triggerRefresh()
     }
 
     // Account Manager Card Container (y = poolHeaderY + dp(14), h = dp(120))
@@ -460,6 +458,7 @@ Item {
     readonly property int modelsHeaderY: root.dp(304)
 
     Text {
+        visible: root.activeTab === "9router"
         x: root.dp(24)
         y: root.modelsHeaderY - (implicitHeight / 2)
         text: "TOP MODELS BREAKDOWN"
@@ -470,7 +469,7 @@ Item {
     }
 
     Repeater {
-        model: controller.topModelsList
+        model: root.activeTab === "9router" ? controller.topModelsList : []
         Item {
             id: modelRowItem
             required property var modelData
@@ -480,24 +479,22 @@ Item {
             x: 0
             y: currentBarY
             width: root.width
-            height: root.dp(26)
+            height: root.dp(32)
 
             Text {
                 x: root.dp(24)
-                y: -(implicitHeight / 2)
+                y: -root.dp(2)
                 text: modelRowItem.modelData.clean_name
                 color: "#FFFFFF"
                 font.family: "SF Pro Display"
                 font.pointSize: 9
-                elide: Text.ElideRight
-                width: root.width - root.dp(48) - modelTokensStat.implicitWidth - root.dp(16)
+                font.bold: true
             }
 
             Text {
-                id: modelTokensStat
                 anchors.right: parent.right
                 anchors.rightMargin: root.dp(24)
-                y: -(implicitHeight / 2)
+                y: -root.dp(2)
                 text: modelRowItem.modelData.tokens_str
                 color: "#A1A1A6"
                 font.family: "SF Pro Display"
@@ -530,6 +527,7 @@ Item {
     readonly property int feedHeaderY: root.dp(430)
 
     Text {
+        visible: root.activeTab === "9router"
         x: root.dp(24)
         y: root.feedHeaderY - (implicitHeight / 2)
         text: "LIVE API CALL HISTORY"
@@ -540,7 +538,7 @@ Item {
     }
 
     Repeater {
-        model: controller.recentCallsList
+        model: root.activeTab === "9router" ? controller.recentCallsList : []
         Item {
             id: historyRowItem
             required property var modelData
@@ -595,9 +593,9 @@ Item {
             }
         }
     }
-    } // End routerCards
+    } // End accountManagerGroup
 
-    // 6. AGENT FLEET ROSTER OVERLAY VIEW (when activeTab === "fleet")
+    // 6. AGENT FLEET ROSTER VIEW (when activeTab === "fleet")
     Item {
         id: fleetOverlay
         x: 0
@@ -609,7 +607,7 @@ Item {
         // Telemetry Subtitle Row
         Text {
             x: root.dp(24)
-            y: root.dp(10) - (implicitHeight / 2)
+            y: root.dp(12) - (implicitHeight / 2)
             text: controller.fleetActiveCount + " active · " + controller.fleetTotalCount + " deployed"
             color: controller.fleetActiveCount > 0 ? "#38bdf8" : "#A1A1A6"
             font.family: "SF Pro Display"
@@ -620,7 +618,7 @@ Item {
         Text {
             anchors.right: parent.right
             anchors.rightMargin: root.dp(24)
-            y: root.dp(10) - (implicitHeight / 2)
+            y: root.dp(12) - (implicitHeight / 2)
             text: controller.fleetTokens + " tokens (" + controller.fleetReasoning + " r)"
             color: "#A1A1A6"
             font.family: "SF Pro Display"
@@ -631,9 +629,9 @@ Item {
         // Fleet Roster Card
         Rectangle {
             x: root.boxX1
-            y: root.dp(24)
+            y: root.dp(28)
             width: root.boxW
-            height: parent.height - root.dp(36)
+            height: parent.height - root.dp(40)
             radius: root.dp(16)
             color: "#121214"
             border.color: "#262629"
