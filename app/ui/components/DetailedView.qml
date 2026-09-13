@@ -176,10 +176,7 @@ Item {
     Item {
         id: accountManagerGroup
         visible: root.activeTab === "9router"
-        x: 0
-        y: 0
-        width: root.width
-        height: root.height
+        anchors.fill: parent
 
         Text {
             x: root.dp(24)
@@ -452,149 +449,157 @@ Item {
             font.pointSize: 8
         }
     }
+    } // End accountManagerGroup
 
     // 4. TOP MODELS BREAKDOWN (modelsHeaderY = dp(304))
     readonly property int modelsHeaderY: root.dp(304)
 
-    Text {
+    Item {
+        id: modelsBreakdownGroup
         visible: root.activeTab === "9router"
-        x: root.dp(24)
-        y: root.modelsHeaderY - (implicitHeight / 2)
-        text: "TOP MODELS BREAKDOWN"
-        color: "#58585E"
-        font.family: "SF Pro Display"
-        font.pointSize: 9
-        font.bold: true
-    }
+        anchors.fill: parent
 
-    Repeater {
-        model: root.activeTab === "9router" ? controller.topModelsList : []
-        Item {
-            id: modelRowItem
-            required property var modelData
-            required property int index
+        Text {
+            x: root.dp(24)
+            y: root.modelsHeaderY - (implicitHeight / 2)
+            text: "TOP MODELS BREAKDOWN"
+            color: "#58585E"
+            font.family: "SF Pro Display"
+            font.pointSize: 9
+            font.bold: true
+        }
 
-            readonly property int currentBarY: root.modelsHeaderY + root.dp(24) + (index * root.dp(32))
-            x: 0
-            y: currentBarY
-            width: root.width
-            height: root.dp(26)
+        Repeater {
+            model: controller.topModelsList
+            Item {
+                id: modelRowItem
+                required property var modelData
+                required property int index
 
-            Text {
-                x: root.dp(24)
-                y: -(implicitHeight / 2)
-                text: modelRowItem.modelData.clean_name
-                color: "#FFFFFF"
-                font.family: "SF Pro Display"
-                font.pointSize: 9
-                elide: Text.ElideRight
-                width: root.width - root.dp(48) - modelTokensStat.implicitWidth - root.dp(16)
-            }
+                x: 0
+                y: root.modelsHeaderY + root.dp(24) + (modelRowItem.index * root.dp(32))
+                width: root.width
+                height: root.dp(26)
 
-            Text {
-                id: modelTokensStat
-                anchors.right: parent.right
-                anchors.rightMargin: root.dp(24)
-                y: -(implicitHeight / 2)
-                text: modelRowItem.modelData.tokens_str
-                color: "#A1A1A6"
-                font.family: "SF Pro Display"
-                font.pointSize: 8
-            }
+                Text {
+                    x: root.dp(24)
+                    y: -(implicitHeight / 2)
+                    text: modelRowItem.modelData.clean_name
+                    color: "#FFFFFF"
+                    font.family: "SF Pro Display"
+                    font.pointSize: 9
+                    elide: Text.ElideRight
+                    width: root.width - root.dp(48) - modelTokensStat.implicitWidth - root.dp(16)
+                }
 
-            Rectangle {
-                x: root.dp(24)
-                y: root.dp(14)
-                width: root.width - root.dp(48)
-                height: root.dp(6)
-                radius: root.dp(3)
-                color: "#202024"
-                border.color: "#28282C"
-                border.width: 1
+                Text {
+                    id: modelTokensStat
+                    anchors.right: parent.right
+                    anchors.rightMargin: root.dp(24)
+                    y: -(implicitHeight / 2)
+                    text: modelRowItem.modelData.tokens_str
+                    color: "#A1A1A6"
+                    font.family: "SF Pro Display"
+                    font.pointSize: 8
+                }
 
                 Rectangle {
-                    anchors.left: parent.left
-                    anchors.top: parent.top
-                    anchors.bottom: parent.bottom
-                    width: Math.max(0, Math.min(parent.width, parent.width * modelRowItem.modelData.ratio))
+                    x: root.dp(24)
+                    y: root.dp(14)
+                    width: root.width - root.dp(48)
+                    height: root.dp(6)
                     radius: root.dp(3)
-                    color: "#E5E5EA"
+                    color: "#202024"
+                    border.color: "#28282C"
+                    border.width: 1
+
+                    Rectangle {
+                        anchors.left: parent.left
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        width: Math.max(0, Math.min(parent.width, parent.width * modelRowItem.modelData.ratio))
+                        radius: root.dp(3)
+                        color: "#E5E5EA"
+                    }
                 }
             }
         }
-    }
+    } // End modelsBreakdownGroup
 
     // 5. LIVE API CALL HISTORY (feedHeaderY = dp(430))
     readonly property int feedHeaderY: root.dp(430)
 
-    Text {
+    Item {
+        id: apiHistoryGroup
         visible: root.activeTab === "9router"
-        x: root.dp(24)
-        y: root.feedHeaderY - (implicitHeight / 2)
-        text: "LIVE API CALL HISTORY"
-        color: "#58585E"
-        font.family: "SF Pro Display"
-        font.pointSize: 9
-        font.bold: true
-    }
+        anchors.fill: parent
 
-    Repeater {
-        model: root.activeTab === "9router" ? controller.recentCallsList : []
-        Item {
-            id: historyRowItem
-            required property var modelData
-            required property int index
+        Text {
+            x: root.dp(24)
+            y: root.feedHeaderY - (implicitHeight / 2)
+            text: "LIVE API CALL HISTORY"
+            color: "#58585E"
+            font.family: "SF Pro Display"
+            font.pointSize: 9
+            font.bold: true
+        }
 
-            readonly property int currentFeedY: root.feedHeaderY + root.dp(20) + (index * root.dp(22))
-            x: 0
-            y: currentFeedY
-            width: root.width
-            height: root.dp(20)
+        Repeater {
+            model: controller.recentCallsList
+            Item {
+                id: historyRowItem
+                required property var modelData
+                required property int index
 
-            Rectangle {
-                x: root.dp(24)
-                y: -root.dp(2)
-                width: root.dp(52)
-                height: root.dp(18)
-                radius: root.dp(6)
-                color: historyRowItem.modelData.is_ok ? "#0B2915" : "#2D0E11"
-                border.color: historyRowItem.modelData.is_ok ? "#144D26" : "#59181D"
-                border.width: 1
+                x: 0
+                y: root.feedHeaderY + root.dp(20) + (historyRowItem.index * root.dp(22))
+                width: root.width
+                height: root.dp(20)
+
+                Rectangle {
+                    x: root.dp(24)
+                    y: -root.dp(2)
+                    width: root.dp(52)
+                    height: root.dp(18)
+                    radius: root.dp(6)
+                    color: historyRowItem.modelData.is_ok ? "#0B2915" : "#2D0E11"
+                    border.color: historyRowItem.modelData.is_ok ? "#144D26" : "#59181D"
+                    border.width: 1
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: historyRowItem.modelData.status
+                        color: historyRowItem.modelData.is_ok ? "#30D158" : "#FF453A"
+                        font.family: "SF Pro Display"
+                        font.pointSize: 7
+                        font.bold: true
+                    }
+                }
 
                 Text {
-                    anchors.centerIn: parent
-                    text: historyRowItem.modelData.status
-                    color: historyRowItem.modelData.is_ok ? "#30D158" : "#FF453A"
+                    x: root.dp(86)
+                    y: root.dp(7) - (implicitHeight / 2)
+                    text: historyRowItem.modelData.model
+                    color: "#FFFFFF"
                     font.family: "SF Pro Display"
-                    font.pointSize: 7
-                    font.bold: true
+                    font.pointSize: 9
+                    elide: Text.ElideRight
+                    width: root.width - root.dp(86) - feedStatsStat.implicitWidth - root.dp(16)
+                }
+
+                Text {
+                    id: feedStatsStat
+                    anchors.right: parent.right
+                    anchors.rightMargin: root.dp(24)
+                    y: root.dp(7) - (implicitHeight / 2)
+                    text: historyRowItem.modelData.stats_str
+                    color: "#A1A1A6"
+                    font.family: "SF Pro Display"
+                    font.pointSize: 9
                 }
             }
-
-            Text {
-                x: root.dp(86)
-                y: root.dp(7) - (implicitHeight / 2)
-                text: historyRowItem.modelData.model
-                color: "#FFFFFF"
-                font.family: "SF Pro Display"
-                font.pointSize: 9
-                elide: Text.ElideRight
-                width: root.width - root.dp(86) - feedStatsStat.implicitWidth - root.dp(16)
-            }
-
-            Text {
-                id: feedStatsStat
-                anchors.right: parent.right
-                anchors.rightMargin: root.dp(24)
-                y: root.dp(7) - (implicitHeight / 2)
-                text: historyRowItem.modelData.stats_str
-                color: "#A1A1A6"
-                font.family: "SF Pro Display"
-                font.pointSize: 9
-            }
         }
-    }
-    } // End accountManagerGroup
+    } // End apiHistoryGroup
 
     // 6. AGENT FLEET ROSTER VIEW (when activeTab === "fleet")
     Item {
