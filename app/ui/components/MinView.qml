@@ -8,6 +8,46 @@ Item {
     function dp(px) { return controller.scaler.dp(px); }
     function sp(px) { return controller.scaler.sp(px); }
 
+    // Interactive view cycle & drag on min view
+    MouseArea {
+        anchors.fill: parent
+        hoverEnabled: true
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        onPressed: function(mouse) {
+            if (mouse.button === Qt.LeftButton) {
+                controller.startWindowDrag();
+                window.isDragging = false;
+                window.wasDragged = false;
+            } else if (mouse.button === Qt.RightButton) {
+                controller.toggleDetailed();
+            }
+        }
+        onPositionChanged: function(mouse) {
+            if (mouse.buttons & Qt.LeftButton) {
+                var npos = controller.updateWindowDrag();
+                var nx = npos[0];
+                var ny = npos[1];
+                if (Math.abs(nx - window.x) > 2 || Math.abs(ny - window.y) > 2) {
+                    window.isDragging = true;
+                    window.wasDragged = true;
+                    window.x = nx;
+                    window.y = ny;
+                }
+            }
+        }
+        onReleased: function(mouse) {
+            if (mouse.button === Qt.LeftButton) {
+                if (window.wasDragged) {
+                    window.endDragAndClamp();
+                } else {
+                    controller.cycleView();
+                }
+            }
+        }
+        onEntered: controller.setHovered(true)
+        onExited: controller.setHovered(false)
+    }
+
     // Left Half: Fleet Agent Telemetry (Left margin: dp(14))
     Item {
         id: fleetSection

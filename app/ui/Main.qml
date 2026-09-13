@@ -124,14 +124,16 @@ Window {
             opacity: visible ? 1.0 : 0.0
             anchors.fill: parent
             clip: true
-            z: 10
+            z: 100
         }
 
         // Background Window Drag Area
         MouseArea {
             id: windowDragArea
             anchors.fill: parent
-            z: 99
+            visible: controller ? (controller.currentView !== "detailed") : true
+            enabled: visible
+            z: -1
             hoverEnabled: true
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             cursorShape: Qt.ArrowCursor
@@ -175,7 +177,7 @@ Window {
                 if (mouse.button === Qt.LeftButton) {
                     if (window.wasDragged) {
                         window.endDragAndClamp();
-                    } else {
+                    } else if (controller.currentView !== "detailed") {
                         controller.cycleView();
                     }
                 }

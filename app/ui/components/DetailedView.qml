@@ -22,46 +22,75 @@ Item {
     }
 
     // Interactive Tab Header: 9Router Analytics vs Agent Fleet Roster
-    Row {
+    Item {
         x: root.dp(44)
-        y: root.dp(24) - (implicitHeight / 2)
-        spacing: root.dp(12)
+        y: 0
+        width: tabRow.width
+        height: root.dp(48)
+        z: 100
 
-        Text {
-            text: "9Router Analytics"
-            color: root.activeTab === "9router" ? "#FFFFFF" : "#71717A"
-            font.family: "SF Pro Display"
-            font.pointSize: 11
-            font.bold: true
+        Row {
+            id: tabRow
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: root.dp(12)
 
-            MouseArea {
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onClicked: root.activeTab = "9router"
+            Item {
+                width: rText.implicitWidth + root.dp(16)
+                height: root.dp(32)
+                anchors.verticalCenter: parent.verticalCenter
+
+                Text {
+                    id: rText
+                    anchors.centerIn: parent
+                    text: "9Router Analytics"
+                    color: root.activeTab === "9router" ? "#FFFFFF" : "#71717A"
+                    font.family: "SF Pro Display"
+                    font.pointSize: 11
+                    font.bold: true
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        root.activeTab = "9router";
+                    }
+                }
             }
-        }
 
-        Text {
-            text: "·"
-            color: "#3F3F46"
-            font.family: "SF Pro Display"
-            font.pointSize: 11
-            font.bold: true
-        }
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: "·"
+                color: "#3F3F46"
+                font.family: "SF Pro Display"
+                font.pointSize: 11
+                font.bold: true
+            }
 
-        Text {
-            text: "Agent Fleet Roster"
-            color: root.activeTab === "fleet" ? "#38bdf8" : "#71717A"
-            font.family: "SF Pro Display"
-            font.pointSize: 11
-            font.bold: true
+            Item {
+                width: fText.implicitWidth + root.dp(16)
+                height: root.dp(32)
+                anchors.verticalCenter: parent.verticalCenter
 
-            MouseArea {
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onClicked: root.activeTab = "fleet"
+                Text {
+                    id: fText
+                    anchors.centerIn: parent
+                    text: "Agent Fleet Roster"
+                    color: root.activeTab === "fleet" ? "#38bdf8" : "#71717A"
+                    font.family: "SF Pro Display"
+                    font.pointSize: 11
+                    font.bold: true
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        root.activeTab = "fleet";
+                    }
+                }
             }
         }
     }
